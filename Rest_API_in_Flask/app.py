@@ -1,22 +1,24 @@
-from flask import Flask, jsonify, render_template_string
+from flask import Flask, render_template_string
 import requests
 
 app = Flask(__name__)
 
-# Route to call external REST API and show data
-@app.route('/')
+@app.route('/', methods=['GET'])
 def fetch_users():
     api_url = 'https://jsonplaceholder.typicode.com/users'
     response = requests.get(api_url)
 
     if response.status_code == 200:
         users = response.json()
-        # Display users in simple HTML
+        # Strip email to show only the part before '@'
+        for user in users:
+            user["email_prefix"] = user["email"].split("@")[0]
+
         html = """
-        <h2>User List from External API</h2>
+        <h2>User List (Name + Partial Email)</h2>
         <ul>
             {% for user in users %}
-                <li><strong>{{ user.name }}</strong> ({{ user.email }})</li>
+                <li><strong>{{ user.name }}</strong> ({{ user.email_prefix }}@...)</li>
             {% endfor %}
         </ul>
         """
